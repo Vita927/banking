@@ -1,2 +1,0 @@
-/usr/bin/ar qc libbanking.a CMakeFiles/banking.dir/src/banking.cpp.o
-/usr/bin/ranlib libbanking.a
