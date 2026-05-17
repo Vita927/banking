@@ -1,0 +1,40 @@
+name: Coverage
+on: [push]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install CMake and lcov
+      run: sudo apt update && sudo apt install cmake lcov
+    
+    - name: Download Google Test
+      run: |
+        mkdir -p third-party
+        cd third-party
+        git clone https://github.com/google/googletest.git gtest
+        cd ..
+    
+    - name: Configure and build
+      run: |
+        cmake -H. -B_build -DBUILD_TESTS=ON
+        cmake --build _build
+    
+    - name: Run tests with coverage
+      run: cd _build && ctest --verbose
+    
+    - name: Generate coverage report
+      run: |
+        cd _build
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --remove coverage.info '*/third-party/*' --output-file coverage.info
+        lcov --list coverage.info
+    
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        file: _build/coverage.info
+        github-token: ${{ secrets.GITHUB_TOKEN }}
