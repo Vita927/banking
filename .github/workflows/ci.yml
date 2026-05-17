@@ -25,3 +25,20 @@ jobs:
     
     - name: Test
       run: cd _build && ctest --verbose
+
+    - name: Install lcov
+      run: sudo apt install lcov
+
+    - name: Generate coverage report
+      run: |
+        cd _build
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --remove coverage.info '*/third-party/*' --output-file coverage.info
+        lcov --list coverage.info
+
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        file: _build/coverage.info
+        github-token: ${{ secrets.GITHUB_TOKEN }}
